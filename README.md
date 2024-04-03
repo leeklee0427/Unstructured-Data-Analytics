@@ -1,14 +1,9 @@
 <a name="top"></a>
 
-
-
 # 95-865: Unstructured Data Analytics
-
-
 
 ## Links
 [95-865: Unstructured Data Analytics (Spring 2024 Mini 4)](https://www.andrew.cmu.edu/user/georgech/95-865/)
-
 
 ## Course Outline
 
@@ -29,11 +24,13 @@ Make predictions using known structure in data
 ## Table of Contents
 1. [Overview](#1-overview)
 2. [Basic Text Analysis](#2-basic-text-analysis)
-3. 
-4. 
+3. [Co-occurrence Analysis (Bigram)](#3-co-occurrence-analysis)
+4. [Co-occurrence Analysis (N-gram)](#4-co-occurence-analysis-pca)
 5. 
 6. 
 7. [Clustering](#7-clustering)
+8. [Clustering II]()
+9. [Topic Modeling]()
 
 
 [Back to Top](#)
@@ -85,7 +82,7 @@ Solving a "murder mystery"
 
 
 
-## 2. Basic Text Analysis
+## 2. Basic Text Analysis (Part I)
 
 
 ### NLP Tasks
@@ -113,7 +110,6 @@ Other common tasks:
 - 1 word at a time: Unigram model
 - 3 words at a time: Trigram model
 - n words at a time: n-gram model
-
 
 
 ### spaCy
@@ -251,19 +247,107 @@ plt.ylabel('Raw count')
 
 
 
+## 3. Basic Text Analysis (Part II), Co-occurrence Analysis (Part I)
+[Jupyter notebook (basic text analysis using arrays)](https://gist.github.com/georgehc/7c7fac867821b5ab4db84107c38b591a)  
+[Jupyter notebook (co-occurrence analysis toy example)](https://gist.github.com/georgehc/fc4d54e525ba9c76325cdc7d468ccb28)  
 
 
-## 3. Co-occurrence Analysis
+### Using Arrays/Vectors
+
+Identify all distinct tokens within the article and document the index of initial occurrences
+
+Represent each term as a "one-hot" encoded vector
+
+
+### Demo
+
+#### OHE Representation
+
+```python
+import numpy as np
+
+one_hot_encoded_vectors = []
+for token in parsed_text:
+    word = token.orth_
+
+    one_hot_encoded_vector = np.zeros(vocab_size)  # all zeros; length of vector is the vocabulary size
+    one_hot_encoded_vector[word_to_idx[word]] = 1  # set the current word's index to have a value of 1
+
+    one_hot_encoded_vectors.append(one_hot_encoded_vector)
+
+one_hot_encoded_vectors = np.array(one_hot_encoded_vectors)  # Convert list of 1D arrays into NumPy 2D array
+```
+
+#### Counts
+
+```python
+raw_counts = one_hot_encoded_vectors.sum(axis=0) # Sum columns
+
+sorted(zip(raw_counts, vocab), reverse=True) 
+```
 
 
 
 
+### Co-occurrence Analysis (Part I)
+- **Co-occurrence analysis** identifies and analyzes patterns of co-occurrence between terms or entities within a corpus of text. 
+
+- **Pointwise Mutual Information (PMI)** is a measure used to quantify the strength of the association between two terms in a corpus of text.
+
+$$ PMI(A, B) = \log \left( \frac{P(A, B)}{P(A) \cdot P(B)} \right) $$
+- If $PMI = 0$, A and B are independent, $P(A, B) = P(A) \cdot P(B)$
+- If $PMI$ more positive value -> A & B co-occur much more likely than if they were independent
+- If $PMI$ more negative value -> A & B co-occur much less likely than if they were independent
+- For pairs that rarely occured, $P(A, B) = 0$, $\log 0$ is undefined ($-\infty$)
 
 
+### Demo
+
+Rank using co-occurence probability $P(A, B)$ can be misleading
+
+####
+```python
+from collections import Counter
+co_occurrence_probabilities = Counter()
+for person, company in all_pairs:
+    count = 0
+    for doc in docs:
+        if person in doc and company in doc:
+            count += 1
+    co_occurrence_probabilities[(person, company)] = count / len(docs)
+```
+
+Rank using $PMI$
+
+```python
+people_probabilities = Counter()
+for person in people:
+    count = 0
+    for doc in docs:
+        if person in doc:
+            count += 1
+    people_probabilities[person] = count / len(docs)
+print(people_probabilities)
 
 
+company_probabilities = Counter()
+for company in companies:
+    count = 0
+    for doc in docs:
+        if company in doc:
+            count += 1
+    company_probabilities[company] = count / len(docs)
+print(company_probabilities)
 
 
+from math import log  # natural log
+pmi_scores = Counter()
+for person, company in all_pairs:
+    ratio = co_occurrence_probabilities[(person, company)] / (people_probabilities[person] * company_probabilities[company])
+    pmi_scores[(person, company)] = log(ratio)
+
+pmi_scores.most_common()
+```
 
 
 [Back to Top](#)
@@ -275,13 +359,55 @@ plt.ylabel('Raw count')
 
 
 
+## 4. Co-occurence Analysis (Part II)
+[Jupyter notebook (text generation using n-grams)](https://gist.github.com/georgehc/08460bad0e078adc500192b3ff608db4)
+
+### N-gram
+THe distribution of the next character given L characters:
+
+$$
+P(B|A) = \frac{P(A, B)}{P(A)}
+
+= \frac{\# \text{ seq. of } L + 1 \text{ consecutive characters equal to } A \text{ followed by } B}{\# \text{ seq. of } L + 1 \text{ consecutive characters starting with } A}
+$$
 
 
-## 4.
+```python
+seq_counts = Counter()
+prev_seq_counts = Counter()
+
+for idx in range(len(text) - (L + 1)):
+    seq = text[idx:idx+L+1]  # sequence of length L+1
+    prev_seq = seq[:-1]  # everything except for last character
+
+    seq_counts[seq] += 1
+    prev_seq_counts[prev_seq] += 1
 
 
+prev_seq_counts['the']
+```
 
+```python
+prev_seq = 'zqe'
+assert len(prev_seq) == L
 
+pseudocount = 1
+distribution_of_next_character = Counter()
+for character in unique_characters:
+    distribution_of_next_character[character] = \
+        (seq_counts[prev_seq + character] + pseudocount) / \
+        (prev_seq_counts[prev_seq] + pseudocount * len(unique_characters))
+
+distribution_of_next_character.most_common()
+```
+
+Sample output
+```
+[('\n', 0.011627906976744186),
+ (' ', 0.011627906976744186),
+ ('"', 0.011627906976744186),
+ ('$', 0.011627906976744186),
+ ```
 
 
 [Back to Top](#)
@@ -289,7 +415,6 @@ plt.ylabel('Raw count')
 
 
 ---
-
 
 
 
@@ -474,3 +599,23 @@ Repeat until convergence:
 
 - Models are approximations/simplifications of the reality.
 - Some models provide insights, make predictions, or enable decisions that are sufficiently accurate for practical purposes.
+
+
+
+
+
+## 8. Clustering
+
+
+[Back to Top](#)
+
+---
+
+
+
+
+## 9. Topic Modeling
+
+[Back to Top](#)
+
+---
