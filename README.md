@@ -28,7 +28,7 @@ Make predictions using known structure in data
 
 ## Table of Contents
 1. [Overview](#1-overview)
-2. 
+2. [Basic Text Analysis](#2-basic-text-analysis)
 3. 
 4. 
 5. 
@@ -64,7 +64,7 @@ Solving a "murder mystery"
 ---
 
 
-### BoW Model
+### Bag of Words (BoW)
 - **Bag of Words (BoW)** model represents text data as a collection of words without considering the order.
     - Uses raw count frequency to represent the occurrence of words
 - **Corpus**: a large and structured collection of text documents.
@@ -116,12 +116,135 @@ Other common tasks:
 
 
 
-### spaCy Demo
+### spaCy
 [Jupyter notebook (basic text analysis)](https://gist.github.com/georgehc/932764d81cd246a60b85e28648cf05bc)
-```Python
 
-
+#### Load model
+```python
+import spacy
+nlp = spacy.load('en_core_web_sm')  # Load spaCy's built-in English tokenizer, tagger, parser, NER, and word vectors
 ```
+
+#### Processing
+```python
+parsed_text = nlp(text)
+```
+
+#### Display tokens
+```python
+for token in parsed_text:
+    """
+    Display the token's orthographic representation, lemma, part of speech, and entity type (empty if not part of a named entity)
+    """
+    print(token, token.lemma_, token.pos_, token.ent_type_)
+```
+- Including `_` means the string representation
+- After the foreach loop, `token` will point to the last element from the parsed text, which is a period (`.`)
+
+
+#### Iterate through the named entities
+```python
+for entity in parsed_text.ents:
+    print(entity, entity.label_)
+```
+
+#### Iterate through the sentences
+```python
+idx = 0
+for sentence in parsed_text.sents:
+    print('Sentence number', idx, ':', sentence)
+    idx += 1
+
+
+for idx, sentence in enumerate(parsed_text.sents):
+    print('Sentence number', idx, ':', sentence)
+```
+
+#### Tokens and counts
+
+```python
+histogram = {}
+for token in parsed_text:
+    if token.orth_ not in histogram:
+        histogram[token.orth_] = 1
+    else:
+        histogram[token.orth_] += 1
+
+# Convert to a list of tuples
+list(histogram.items())
+
+from operator import itemgetter
+sorted_token_count_pairs = sorted(histogram.items(),
+                                  reverse=True, # Sort in reverse order (largest to smallest)
+                                  key=itemgetter(1)) # lambda x: x[1]
+```
+
+Alternative: `Counter.most_common()`
+
+```python
+from collections import Counter
+
+histogram = Counter()
+for token in parsed_text:
+    histogram[token.orth_] += 1
+
+sorted_token_count_pairs = histogram.most_common()
+for token, count in sorted_token_count_pairs:
+    print(token, ":", count)
+```
+
+
+#### Remove stopwords, punctuations, and spaces
+```python
+from collections import Counter
+
+histogram_with_filtering = Counter()
+for token in parsed_text:
+    lemma = token.lemma_.lower() # Convert lemma to lowercase
+    # Ignore junk
+    if not (nlp.vocab[lemma].is_stop or token.pos_ == 'PUNCT' or token.pos_ == 'SPACE' or token.pos_ == 'X'):
+        histogram_with_filtering[lemma] += 1
+
+sorted_lemma_count_pairs = histogram_with_filtering.most_common()
+for lemma, count in sorted_lemma_count_pairs:
+    print(lemma, ":", count)
+```
+
+
+#### Manually remove stopwords
+```python
+manual_stop_words = {'jump', 'b', '-', 'c'} # Create a set
+
+# Keep lemma that are not the stopwords
+histogram_filtered_twice = Counter({lemma: count
+                                    for lemma, count in histogram_with_some_filtering.items()
+                                    if lemma not in manual_stop_words})
+
+twice_filtered_sorted_lemma_count_pairs = histogram_filtered_twice.most_common()
+for lemma, count in twice_filtered_sorted_lemma_count_pairs:
+    print(lemma, ":", count)
+```
+
+#### Plot the top 20 most frequently occurring lemmas
+```python
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+num_top_lemmas_to_plot = 20
+top_lemmas = [lemma for lemma, count in twice_filtered_sorted_lemma_count_pairs[:num_top_lemmas_to_plot]]
+top_counts = [count for lemma, count in twice_filtered_sorted_lemma_count_pairs[:num_top_lemmas_to_plot]]
+plt.bar(range(num_top_lemmas_to_plot), top_counts)
+plt.xticks(range(num_top_lemmas_to_plot), top_lemmas, rotation=90)
+plt.xlabel('Lemma')
+plt.ylabel('Raw count')
+```
+
+
+### Summary
+- Represent each document as a histogram/probability distribution
+- Feature vector: vector representation of the document
+    - Feature vectors are high-dimensional
+    - Dimensions = number of terms
 
 
 
@@ -134,11 +257,22 @@ Other common tasks:
 
 
 
+
+
+
+
+
+
+
+
+
 [Back to Top](#)
-
-
-
 ---
+
+
+
+
+
 
 
 
@@ -195,9 +329,15 @@ Other common tasks:
 
 
 
+
+
+
+
+
+
+
+
 ## 7. Clustering
-
-
 
 ### Overview
 
@@ -233,6 +373,8 @@ Source: https://archive.ics.uci.edu/dataset/373/drug+consumption+quantified
 
 
 ---
+
+
 
 
 ### Effectiveness Assessment of Similarity/Distance Functions
