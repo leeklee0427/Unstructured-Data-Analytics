@@ -1,12 +1,18 @@
 <a name="top"></a>
 
+
+
 # 95-865: Unstructured Data Analytics
 
 
-## Course Overview
+
+## Links
+[95-865: Unstructured Data Analytics (Spring 2024 Mini 4)](https://www.andrew.cmu.edu/user/georgech/95-865/)
+
+
+## Course Outline
 
 ### Part I: Exploratory data analysis
-
 Identify structure present in "unstructured" data
 - Frequency and co-occurrence analysis
 - Visualizing high-dimensional data/dimensionality reduction
@@ -14,10 +20,11 @@ Identify structure present in "unstructured" data
 - Topic modeling
 
 ### Part II: Predictive data analysis
-
 Make predictions using known structure in data
 - Basic concepts and quality assessment of prediction models
 - Neural networks and deep learning for analyzing texts and image
+
+
 
 ## Table of Contents
 1. [Overview](#1-overview)
@@ -28,10 +35,10 @@ Make predictions using known structure in data
 6. 
 7. [Clustering](#7-clustering)
 
----
 
 [Back to Top](#)
 
+---
 
 
 ## 1. Overview
@@ -46,18 +53,144 @@ Make predictions using known structure in data
     - Videos
     - Audio
 
-
-
 ### Unstructured Data Analysis
+Solving a "murder mystery"
 1. Question
 2. Data/Evidence
 3. Finding Structure: Exploratory data analysis
 4. Insights: Answer original question
 
 
+---
 
-### Basic Text Analysis
 
+### BoW Model
+- **Bag of Words (BoW)** model represents text data as a collection of words without considering the order.
+    - Uses raw count frequency to represent the occurrence of words
+- **Corpus**: a large and structured collection of text documents.
+- **Collection Term Frequency (CTF)** refers to the frequency of a term across an entire collection of documents in a corpus.
+
+
+#### Properties of Text
+1. Split on blank spaces
+2. Stopwords typically do not carry significant semantic meaning
+    - Remove stopwords or not?
+
+
+[Back to Top](#)
+
+
+
+---
+
+
+
+## 2. Basic Text Analysis
+
+
+### NLP Tasks
+
+For words in various forms, capitalization:
+- **Lemmatization** reduces words to the base or canonical form, known as the lemma, while still preserving the meaning.
+
+For words with multiple meanings:
+- **Word Sense Disambiguation (WSD)** determines the correct meaning or sense of a word within a given context.
+
+For named entities:
+- **Named Entity Recognition (NER)** identifies and categorizes named entities within text data into predefined categories such as persons, organizations, locations, dates, quantities, and etc.
+
+Other common tasks:
+- **Tokenization** breaks down a text into smaller units, called tokens, which can be words, phrases, symbols, or other meaningful elements.
+
+- **Part-of-speech (POS) tagging** assigns a part-of-speech tag to each word in a text based on syntactic role and grammatical category within a sentence, including nouns, verbs, adjectives, adverbs, pronouns, conjunctions, prepositions, and interjections.
+
+- **Sentence boundary detection** (sentence recognition) determines where one sentence ends and the next begins in a given text.
+
+
+
+### Bigram Model
+**Bigram model** is a probabilistic language model predicts the probability of a word given the previous word in a sequence of words.
+- 1 word at a time: Unigram model
+- 3 words at a time: Trigram model
+- n words at a time: n-gram model
+
+
+
+### spaCy Demo
+[Jupyter notebook (basic text analysis)](https://gist.github.com/georgehc/932764d81cd246a60b85e28648cf05bc)
+```Python
+
+
+```
+
+
+
+
+
+
+
+
+## 3. Co-occurrence Analysis
+
+
+
+[Back to Top](#)
+
+
+
+---
+
+
+
+
+## 4.
+
+
+
+
+
+
+[Back to Top](#)
+
+
+
+---
+
+
+
+
+
+## 5. PCA
+
+
+
+
+
+
+[Back to Top](#)
+
+
+
+---
+
+
+
+
+
+
+
+
+## 6. Manifold learning
+
+
+
+
+
+[Back to Top](#)
+
+
+
+---
 
 
 
@@ -125,7 +258,7 @@ Source: https://archive.ics.uci.edu/dataset/373/drug+consumption+quantified
 | - | <font color='red'>Requires certain termination criteria.</font> |
 
 
-
+---
 
 
 ### K-Means Clustering
