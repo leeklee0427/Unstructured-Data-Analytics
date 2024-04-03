@@ -2,8 +2,11 @@
 
 # 95-865: Unstructured Data Analytics
 
+
 ## Links
 [95-865: Unstructured Data Analytics (Spring 2024 Mini 4)](https://www.andrew.cmu.edu/user/georgech/95-865/)
+
+
 
 ## Course Outline
 
@@ -22,15 +25,15 @@ Make predictions using known structure in data
 
 
 ## Table of Contents
-1. [Overview](#1-overview)
-2. [Basic Text Analysis](#2-basic-text-analysis)
-3. [Co-occurrence Analysis (Bigram)](#3-co-occurrence-analysis)
-4. [Co-occurrence Analysis (N-gram)](#4-co-occurence-analysis-pca)
-5. 
-6. 
-7. [Clustering](#7-clustering)
-8. [Clustering II]()
-9. [Topic Modeling]()
+- [Lecture 1. Overview](#lecture-1-overview)
+- [Lecture 2. Basic Text Analysis](#lecture-2-basic-text-analysis)
+- [Lecture 3. Basic Text Analysis, Co-occurrence Analysis](#lecture-3-basic-text-analysis-co-occurrence-analysis)
+- [Lecture 4. Co-occurrence Analysis](#lecture-4-co-occurence-analysis)
+- [Lecture 5. PCA](#lecture-5-pca)
+- [Lecture 6. Manifold Learning](#lecture-6-manifold-learning)
+- [Lecture 7. Clustering](#lecture-7-clustering)
+- [Lecture 8, Clustering II]()
+- [Topic Modeling]()
 
 
 [Back to Top](#)
@@ -38,7 +41,7 @@ Make predictions using known structure in data
 ---
 
 
-## 1. Overview
+## Lecture 1. Overview
 
 ### Types of Data
 
@@ -51,14 +54,11 @@ Make predictions using known structure in data
     - Audio
 
 ### Unstructured Data Analysis
-Solving a "murder mystery"
+**Analogy: Solving a "murder mystery"**
 1. Question
 2. Data/Evidence
 3. Finding Structure: Exploratory data analysis
 4. Insights: Answer original question
-
-
----
 
 
 ### Bag of Words (BoW)
@@ -76,14 +76,11 @@ Solving a "murder mystery"
 
 [Back to Top](#)
 
-
-
 ---
 
 
 
-## 2. Basic Text Analysis (Part I)
-
+## Lecture 2. Basic Text Analysis
 
 ### NLP Tasks
 
@@ -104,18 +101,17 @@ Other common tasks:
 - **Sentence boundary detection** (sentence recognition) determines where one sentence ends and the next begins in a given text.
 
 
-
 ### Bigram Model
 **Bigram model** is a probabilistic language model predicts the probability of a word given the previous word in a sequence of words.
 - 1 word at a time: Unigram model
 - 3 words at a time: Trigram model
-- n words at a time: n-gram model
+- n words at a time: N-gram model
 
 
-### spaCy
+### spaCy with Dictionaries/Counter
 [Jupyter notebook (basic text analysis)](https://gist.github.com/georgehc/932764d81cd246a60b85e28648cf05bc)
 
-#### Load model
+#### Load spaCy model
 ```python
 import spacy
 nlp = spacy.load('en_core_web_sm')  # Load spaCy's built-in English tokenizer, tagger, parser, NER, and word vectors
@@ -235,7 +231,6 @@ plt.xlabel('Lemma')
 plt.ylabel('Raw count')
 ```
 
-
 ### Summary
 - Represent each document as a histogram/probability distribution
 - Feature vector: vector representation of the document
@@ -244,25 +239,24 @@ plt.ylabel('Raw count')
 
 
 
+[Back to Top](#)
+
+---
 
 
 
-## 3. Basic Text Analysis (Part II), Co-occurrence Analysis (Part I)
+## Lecture 3. Basic Text Analysis, Co-occurrence Analysis
 [Jupyter notebook (basic text analysis using arrays)](https://gist.github.com/georgehc/7c7fac867821b5ab4db84107c38b591a)  
 [Jupyter notebook (co-occurrence analysis toy example)](https://gist.github.com/georgehc/fc4d54e525ba9c76325cdc7d468ccb28)  
 
 
-### Using Arrays/Vectors
+### spaCy with Arrays/Vectors
 
 Identify all distinct tokens within the article and document the index of initial occurrences
 
 Represent each term as a "one-hot" encoded vector
 
-
-### Demo
-
 #### OHE Representation
-
 ```python
 import numpy as np
 
@@ -287,9 +281,7 @@ sorted(zip(raw_counts, vocab), reverse=True)
 ```
 
 
-
-
-### Co-occurrence Analysis (Part I)
+### Co-occurrence Analysis
 - **Co-occurrence analysis** identifies and analyzes patterns of co-occurrence between terms or entities within a corpus of text. 
 
 - **Pointwise Mutual Information (PMI)** is a measure used to quantify the strength of the association between two terms in a corpus of text.
@@ -301,7 +293,7 @@ $$ PMI(A, B) = \log \left( \frac{P(A, B)}{P(A) \cdot P(B)} \right) $$
 - For pairs that rarely occured, $P(A, B) = 0$, $\log 0$ is undefined ($-\infty$)
 
 
-### Demo
+### Bigram
 
 Rank using co-occurence probability $P(A, B)$ can be misleading
 
@@ -349,17 +341,14 @@ for person, company in all_pairs:
 pmi_scores.most_common()
 ```
 
-
 [Back to Top](#)
+
 ---
 
 
 
 
-
-
-
-## 4. Co-occurence Analysis (Part II)
+## Lecture 4. Co-occurence Analysis
 [Jupyter notebook (text generation using n-grams)](https://gist.github.com/georgehc/08460bad0e078adc500192b3ff608db4)
 
 ### N-gram
@@ -412,14 +401,12 @@ Sample output
 
 [Back to Top](#)
 
-
-
 ---
 
 
 
 
-## 5. PCA
+## Lecture 5. PCA
 
 
 
@@ -428,8 +415,6 @@ Sample output
 
 [Back to Top](#)
 
-
-
 ---
 
 
@@ -439,7 +424,7 @@ Sample output
 
 
 
-## 6. Manifold learning
+## Lecture 6. Manifold learning
 
 
 
@@ -447,8 +432,6 @@ Sample output
 
 [Back to Top](#)
 
-
-
 ---
 
 
@@ -462,7 +445,7 @@ Sample output
 
 
 
-## 7. Clustering
+## Lecture 7. Clustering
 
 ### Overview
 
@@ -604,7 +587,7 @@ Repeat until convergence:
 
 
 
-## 8. Clustering
+## Lecture 8. Clustering
 
 
 [Back to Top](#)
@@ -612,9 +595,7 @@ Repeat until convergence:
 ---
 
 
-
-
-## 9. Topic Modeling
+## Lecture 9. Topic Modeling
 
 [Back to Top](#)
 
