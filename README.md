@@ -32,8 +32,8 @@ Make predictions using known structure in data
 - [Lecture 5. PCA](#lecture-5-pca)
 - [Lecture 6. Manifold Learning](#lecture-6-manifold-learning)
 - [Lecture 7. Clustering](#lecture-7-clustering)
-- [Lecture 8, Clustering II]()
-- [Topic Modeling]()
+- [Lecture 8. Clustering II]()
+- [Lecture 8. Topic Modeling]()
 
 
 [Back to Top](#)
@@ -256,6 +256,7 @@ Identify all distinct tokens within the article and document the index of initia
 
 Represent each term as a "one-hot" encoded vector
 
+
 #### OHE Representation
 ```python
 import numpy as np
@@ -355,9 +356,11 @@ pmi_scores.most_common()
 THe distribution of the next character given L characters:
 
 $$
+
 P(B|A) = \frac{P(A, B)}{P(A)}
 
 = \frac{\# \text{ seq. of } L + 1 \text{ consecutive characters equal to } A \text{ followed by } B}{\# \text{ seq. of } L + 1 \text{ consecutive characters starting with } A}
+
 $$
 
 
@@ -375,6 +378,7 @@ for idx in range(len(text) - (L + 1)):
 
 prev_seq_counts['the']
 ```
+
 
 ```python
 prev_seq = 'zqe'
@@ -407,8 +411,62 @@ Sample output
 
 
 ## Lecture 5. PCA
+**Principal Component Analysis (PCA)** is a dimensionality reduction technique which transforms the original features of a dataset into a new set of orthogonal (uncorrelated) features called principal components, which are linear combinations of the original features.
 
 
+[PCA Explained Visually](http://setosa.io/ev/principal-component-analysis/)
+
+
+- Identify the top k orthogonal directions that explain the most variance in the data.
+- Each component explains the remaining variance along a direction orthogonal to the preceding ones.
+- Ultimately, flatten the data by retaining only the top k dimensions.
+    - If k is less than the original dimensionality, the operation constitutes dimensionality reduction.
+
+
+Fitting a PCA model means:
+- Determining the center of mass of the data being fitted to the model.
+- Determining "weights" for each principal component direction.
+
+
+
+### sklearn.decomposition.PCA
+
+```python
+from sklearn.decomposition import PCA
+
+single_dimension_pca = PCA(n_components=1)  # Project data down into a single dimension
+single_dimension_pca.fit(food_data.T)
+single_dimension_food_data = single_dimension_pca.fit_transform(food_data.T)
+```
+
+#### Compute variance explained
+```python
+single_dimension_pca.explained_variance_ratio_
+```
+
+
+#### Weights assigned to features
+```python
+single_dimension_pca.components_ #
+single_dimension_pca.components_[0] # Index 0 for the 1st principal component
+```
+
+#### Center of mass
+```python
+single_dimension_pca.mean_
+```
+
+
+#### Compute PCA coordinates by inner/dot product
+$$\text{Transformed Data} = W^T \cdot (X - \mu)$$
+
+```python
+np.inner(single_dimension_pca.components_[0],
+         food_data[:, 0] - single_dimension_pca.mean_)
+
+np.inner(single_dimension_pca.components_[0],
+         food_data[:, 1] - single_dimension_pca.mean_)
+```
 
 
 
@@ -433,7 +491,6 @@ Sample output
 [Back to Top](#)
 
 ---
-
 
 
 
