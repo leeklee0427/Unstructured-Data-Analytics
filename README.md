@@ -266,7 +266,7 @@ for token in parsed_text:
     word = token.orth_
 
     one_hot_encoded_vector = np.zeros(vocab_size)  # all zeros; length of vector is the vocabulary size
-    one_hot_encoded_vector[word_to_idx[word]] = 1  # set the current word's index to have a value of 1
+    one_hot_encoded_vector[word_to_idx[word]] = 1  # Set the current word's index to 1
 
     one_hot_encoded_vectors.append(one_hot_encoded_vector)
 
@@ -356,11 +356,9 @@ pmi_scores.most_common()
 THe distribution of the next character given L characters:
 
 $$
-
 P(B|A) = \frac{P(A, B)}{P(A)}
 
 = \frac{\# \text{ seq. of } L + 1 \text{ consecutive characters equal to } A \text{ followed by } B}{\# \text{ seq. of } L + 1 \text{ consecutive characters starting with } A}
-
 $$
 
 
@@ -394,7 +392,7 @@ for character in unique_characters:
 distribution_of_next_character.most_common()
 ```
 
-Sample output
+Output
 ```
 [('\n', 0.011627906976744186),
  (' ', 0.011627906976744186),
@@ -411,6 +409,8 @@ Sample output
 
 
 ## Lecture 5. PCA
+[Jupyter notebook (PCA)](https://gist.github.com/georgehc/af73c94f49378b22ec233c26021e24ef)
+
 **Principal Component Analysis (PCA)** is a dimensionality reduction technique which transforms the original features of a dataset into a new set of orthogonal (uncorrelated) features called principal components, which are linear combinations of the original features.
 
 
@@ -484,8 +484,118 @@ np.inner(single_dimension_pca.components_[0],
 
 ## Lecture 6. Manifold learning
 
+[Jupyter notebook (manifold learning)](https://gist.github.com/georgehc/e8919c8f414f7274005d712d6b6e9f52)
+
+**Manifold learning** is used to understand the underlying structure of high-dimensional data by mapping into a lower-dimensional manifold.
+- Lower-dimensional object is called a manifold
+- Manifold learning is *nonlinear* whereas PCA is *linear*
+
+### Isomap (Isometric Mapping)
+1. Step 1: **Nearest Neighbor Graph Construction**
+    - Identify the $k$ nearest neighbors for each data point based on a specified criterion (e.g., Euclidean distance).
+    - Create edges between each point and nearest neighbors to establish a neighborhood graph.
+
+2. Step 2: **Distance Estimation**
+    - Compute the shortest path between every pair of points, constrained to travel along the edges of the neighborhood graph.
+
+3. Step 3: **Multidimensional Scaling (MDS)**
+    - MDS aims to find a configuration of points in a lower-dimensional space that best preserves the pairwise distances observed in the original high-dimensional space by making the two tables *as close as possible* in Euclidean space
 
 
+#### Demo
+```python
+point_names = ['A', 'B', 'C', 'D', 'E']
+distances = np.array([[0, 5, 8, 13, 16],
+                      [5, 0, 5, 10, 13],
+                      [8, 5, 0, 5, 8],
+                      [13, 10, 5, 0, 5],
+                      [16, 13, 8, 5, 0]])
+
+from sklearn.manifold import MDS
+
+# random_state=0 gives the same output each time
+mds = MDS(n_components=1, dissimilarity='precomputed', random_state=0)
+low_dimensional_points = mds.fit_transform(distances)
+print('1D coordinates:')
+print(low_dimensional_points)
+
+from scipy.spatial.distance import pdist, squareform
+low_dimensional_distances = squareform(pdist(low_dimensional_points))
+print('1D distance table:')
+print(low_dimensional_distances)
+```
+
+Output
+```
+1D coordinates:
+[[ 6.4]
+ [ 6.6]
+ [ 0. ]
+ [-4.6]
+ [-8.4]]
+
+1D distance table:
+[[ 0.   0.2  6.4 11.  14.8]
+ [ 0.2  0.   6.6 11.2 15. ]
+ [ 6.4  6.6  0.   4.6  8.4]
+ [11.  11.2  4.6  0.   3.8]
+ [14.8 15.   8.4  3.8  0. ]]
+```
+
+
+#### Observations on Isomap
+- <font color='red'>The quality of the results from using Isomap critically depends on the nearest neighbor graph.</font>
+
+- **Small** number of nearest neighbors emphasizes **local** structure:
+    - Edges connect points closer to each other.
+    - There might not be enough edges to accurately represent the structure.
+
+- **Large** number of nearest neighbors emphasizes **global** structure
+    - Edges connect points that are farther apart.
+    - There might be points that should not be connected.
+
+
+
+### t-SNE
+t-SNE, or t-Distributed Stochastic Neighbor Embedding, aims to preserve **local** structure and relationships between data points.
+- High-dim data (fixed) -> Creates probabilities based on Gaussian distribution -> Probability table (high-dim points)
+- Low-dim data (adjustable) -> Creates probabilities based on Student's t-distribution -> Probability table (low-dim points)
+
+
+#### Parameters in t-SNE
+- `perplexity` is a hyperparameter that controls the effective number of neighbors considered for each data point during the embedding process, which is related to the number of nearest neighbors that are used in computing conditional probabilities in the high-dimensional space.
+    - Low perplexity emphasize **local** structure
+    - High perplexity emphasize **global** structure
+
+- `n_iter`, the number of iterations refers to the total number of optimization steps or iterations performed by the t-SNE algorithm.
+
+- `learning_rate`, the learning rate, "step size" or "eta", controls the size of the steps taken during each iteration of the optimization process.
+
+
+```python
+from sklearn.manifold import TSNE
+
+tsne = TSNE(n_components=1, perplexity=3, learning_rate=0.1, n_iter=1000, init='random', verbose=1, random_state=0)
+
+swiss_roll_1d_tsne = tsne.fit_transform(swiss_roll_2d)
+plot_1d(swiss_roll_1d_tsne)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Recitation
+[Jupyter notebook (more on PCA, argsort)](https://gist.github.com/georgehc/87579cad0f38a2ae95db23a964074e02)  
+[Jupyter notebook (PCA and t-SNE with images)](https://gist.github.com/georgehc/87579cad0f38a2ae95db23a964074e02)  
 
 
 [Back to Top](#)
@@ -642,14 +752,16 @@ Repeat until convergence:
 
 
 
-
-
 ## Lecture 8. Clustering
+
 
 
 [Back to Top](#)
 
 ---
+
+
+
 
 
 ## Lecture 9. Topic Modeling
