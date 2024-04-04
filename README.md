@@ -563,9 +563,10 @@ t-SNE, or t-Distributed Stochastic Neighbor Embedding, aims to preserve **local*
 
 
 #### Parameters in t-SNE
-- `perplexity` is a hyperparameter that controls the effective number of neighbors considered for each data point during the embedding process, which is related to the number of nearest neighbors that are used in computing conditional probabilities in the high-dimensional space.
+- `perplexity` controls the effective number of neighbors considered for each data point during the embedding process, which is related to the number of nearest neighbors that are used in computing conditional probabilities in the high-dimensional space.
     - Low perplexity emphasize **local** structure
     - High perplexity emphasize **global** structure
+    - Typical value between 5-50, smaller than the number of points
 
 - `n_iter`, the number of iterations refers to the total number of optimization steps or iterations performed by the t-SNE algorithm.
 
@@ -584,16 +585,9 @@ plot_1d(swiss_roll_1d_tsne)
 
 
 
+## Recitations
 
-
-
-
-
-
-
-
-
-## Recitation
+Recitation 3  
 [Jupyter notebook (more on PCA, argsort)](https://gist.github.com/georgehc/87579cad0f38a2ae95db23a964074e02)  
 [Jupyter notebook (PCA and t-SNE with images)](https://gist.github.com/georgehc/87579cad0f38a2ae95db23a964074e02)  
 
