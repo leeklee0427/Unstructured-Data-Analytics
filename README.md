@@ -90,15 +90,19 @@ Make predictions using known structure in data
 ### NLP Tasks
 
 For capitalization or words in various forms:
+
 - **Lemmatization** reduces words to the base or canonical form, known as the lemma, while still preserving the meaning.
 
 For words with multiple meanings:
+
 - **Word Sense Disambiguation (WSD)** determines the correct meaning or sense of a word within a given context.
 
 For named entities:
+
 - **Named Entity Recognition (NER)** identifies and categorizes named entities within text data into predefined categories such as persons, organizations, locations, dates, quantities, and etc.
 
 Other common tasks:
+
 - **Tokenization** breaks down a text into smaller units, called tokens, which can be words, phrases, symbols, or other meaningful elements.
 
 - **Part-of-speech (POS) tagging** assigns a part-of-speech tag to each word in a text based on syntactic role and grammatical category within a sentence, including nouns, verbs, adjectives, adverbs, pronouns, conjunctions, prepositions, and interjections.
@@ -108,12 +112,17 @@ Other common tasks:
 
 
 ### Bigram Model
+
 **Bigram model** is a probabilistic language model that predicts the probability of a word given the previous word in a sequence of words.
 
 Similarly,
+
 - Consecutive 1 word at a time: **Unigram model**
+
 - Consecutive 3 words at a time: **Trigram model**
+
 - Consecutive $n$ words at a time: **N-gram model**
+
 
 
 ### Demo: BoW Model (Dictionaries/Counter)
