@@ -14,6 +14,7 @@
 
 ### Part I: Exploratory Data Analysis
 Identify structure present in "unstructured" data
+
 - Frequency and co-occurrence analysis
 - Visualizing high-dimensional data/dimensionality reduction
 - Clustering
@@ -21,6 +22,7 @@ Identify structure present in "unstructured" data
 
 ### Part II: Predictive Data Analysis
 Make predictions using known structure in data
+
 - Basic concepts and quality assessment of prediction models
 - Neural networks and deep learning for analyzing texts and image
 
@@ -333,10 +335,12 @@ sorted(zip(raw_counts, vocab), reverse=True)
 **Co-occurrence analysis** identifies and analyzes patterns of co-occurrence between terms or entities within a corpus of text.
 
 Methodologies:
+
 1. Rank using co-occurence probability $P(A, B)$ may be misleading
 2. **Pointwise Mutual Information (PMI)** is used to quantify the strength of the association between two terms in a corpus of text.
 
 $$ PMI(A, B) = \log \left( \frac{P(A, B)}{P(A) \cdot P(B)} \right) $$
+
 - If $PMI = 0$, A and B are independent, $P(A, B) = P(A) \cdot P(B)$
 - If $PMI$ more positive value -> A & B co-occur much more likely than if they were independent
 - If $PMI$ more negative value -> A & B co-occur much less likely than if they were independent
@@ -436,7 +440,6 @@ The distribution of the next character given L characters:
 
 $$
 P(B|A) = \frac{P(A, B)}{P(A)}
-
 = \frac{\# \text{ seq. of } L + 1 \text{ consecutive characters equal to } A \text{ followed by } B}{\# \text{ seq. of } L + 1 \text{ consecutive characters starting with } A}
 $$
 
@@ -528,12 +531,14 @@ Output
 [PCA Explained Visually](http://setosa.io/ev/principal-component-analysis/)
 
 **Principal Component Analysis (PCA)** transforms the original features of a dataset into a new set of orthogonal (uncorrelated) features called principal components, which are linear combinations of the original features.
+
 - Identify the top k orthogonal directions that explain the most variance in the data.
 - Each component explains the remaining variance along a direction orthogonal to the preceding ones.
 - Ultimately, flatten the data by retaining only the top k dimensions.
     - If k is less than the original dimensionality, the operation constitutes dimensionality reduction.
 
 Fitting a PCA model means:
+
 - Determining the center of mass of the data being fitted to the model.
 - Determining "weights" for each principal component direction.
 
@@ -587,16 +592,19 @@ np.inner(single_dimension_pca.components_[0],
 ## Lecture 6. Manifold Learning
 
 **Manifold learning** is used to understand the underlying structure of high-dimensional data by mapping into a lower-dimensional manifold.
+
 - Lower-dimensional object is a manifold
 - Manifold learning is *nonlinear* whereas PCA is *linear*
 
 
 ### Types of Manifold Learning
+
 1. Isomap (with MDS)
 2. t-SNE
 
 
 ### Isomap (Isometric Mapping)
+
 - Step 1: **Nearest Neighbor Graph Construction**
     - Identify the $k$ nearest neighbors for each data point based on a specified criterion (e.g., Euclidean distance).
     - Create edges between each point and nearest neighbors to establish a neighborhood graph.
