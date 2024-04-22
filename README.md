@@ -865,6 +865,221 @@ Repeat until convergence:
 
 ## Lecture 8. Clustering
 
+### Elliptical Shapes
+
+![Elliptical](./res/elliptical.png)
+
+- K-means does not care about elliptical shapes
+    - A and B are equally similar to the cluster
+
+- GMM takes into account of elliptical shapes
+    - A is less possible than B
+    
+
+### Comparison of K-means and GMM
+
+- K-means approximates the EM algorithm for GMMs if the ellipses are circles with the same "skinniness"
+    - E.g., the same variance in 1D
+
+- K-means does a "hard" assignment of each point to a cluster, whereas the EM algorithm does a "soft" (probabilistic) assignment
+
+
+---
+
+### Demo: Clustering
+
+#### KMeans
+```python
+from sklearn.cluster import KMeans
+
+kmeans = KMeans(n_clusters=6, n_init=1000, random_state=0)
+kmeans.fit(drug_data_normalized_tsne2d)
+```
+
+```python
+kmeans.cluster_centers_  # cluster centers
+```
+
+Output:
+```
+array([[ 18.732716 ,  15.31078  ],
+       [  1.9195244, -28.2517   ],
+       [-34.5151   ,   5.232761 ],
+       [  1.2554346,  32.245243 ],
+       [-20.739096 ,  -8.607383 ],
+       [ 29.461699 ,  -8.84931  ]], dtype=float32)
+```
+
+```python
+kmeans.labels_  # cluster assignments
+```
+
+Output:
+```
+array([4, 3, 3, ..., 1, 1, 5], dtype=int32)
+```
+
+```
+kmeans_cluster_assignments = kmeans.predict(drug_data_normalized_tsne2d)
+```
+
+
+#### GMM
+
+```python
+from sklearn.mixture import GaussianMixture
+
+gmm = GaussianMixture(n_components=6, n_init=1000, random_state=0)
+gmm.fit(drug_data_normalized_tsne2d)
+```
+
+```python
+gmm.means_  # cluster centers
+```
+
+Output:
+```
+array([[ 27.33928578,  -5.06231955],
+       [-28.00473701,  -0.87852303],
+       [ 27.54497997, -32.82091044],
+       [ -0.17242347, -28.14388044],
+       [-21.76265306,  47.20928969],
+       [ 10.70887775,  25.69321578]])
+```
+
+```python
+gmm.weights_  # cluster probabilities
+np.sort(gmm.weights_)[::-1] # Sort largest to smallest
+```
+
+Output:
+```
+array([0.35721647, 0.2506704 , 0.22408943, 0.12305243, 0.02750324,
+       0.01746803])
+```
+
+
+`predict`: finds the probabilities of each data point being in each cluster and makes cluster assignments by assigning each point to the cluster with the highest probability for that point
+```python
+gmm_cluster_assignments = gmm.predict(drug_data_normalized_tsne2d)
+```
+
+`predict_proba`: obtain the probabilities of each point being in each cluster
+```python
+gmm.predict_proba(drug_data_normalized_tsne2d)
+```
+
+Output:
+```
+array([[0.00462147, 0.96520787, 0.        , 0.00000019, 0.        ,
+        0.03017047],
+       [0.01095733, 0.15080895, 0.        , 0.        , 0.        ,
+        0.83823372],
+```
+
+```python
+# Color cluster 1
+plt.scatter(drug_data_normalized_tsne2d[:, 0],
+            drug_data_normalized_tsne2d[:, 1],
+            c=(gmm_cluster_assignments == 1), cmap='Set3')
+plt.axis('equal')
+```
+
+
+```python
+# Calculate center of mass for cluster 2
+drug_data[gmm_cluster_assignments == 2].mean(axis=0)
+```
+
+
+#### Plots
+1. Plot each of the cluster mean for six clusters over 12 different features
+2. Plot the distribution of a single feature in a given cluster
+
+---
+
+### Automatically Choose Cluster Number
+1. For $k = 2, 3, ...$ up to a pre-specified maximum:
+    - Fit model (K-means or GMM) using $k$
+    - Compute a score function for the model
+2. Use whichever $k$ with the best score
+
+
+#### Score Func 1: RSS (Residual Sum of Squares)
+- RSS measures **within-cluster** variation
+    - Helpful for determining the best model when the cluster number is fixed.
+        - Starts with 1000 model and selects the model with the lowest RSS: `KMeans(n_clusters=6, n_init=1000)`
+- RSS is bad for choosing $k$
+    - The optimal number of clusters $k$ is always equal to the number of data points, where $RSS = 0$ is the smallest
+
+
+#### Score Func 2: CH Index (Calinski and Harabasz 1974)
+- CH Index measures the **between-cluster** variation
+- To find the optimal number of clusters $k$, pick $k$ with the highest $CH(k)$, choosing $k$ among 2, 3, ..., up to a pre-specified maximum.
+
+    - The within-cluster variation is given by:
+        $$ W = RSS = \sum_{g=1}^{k} RSS_g = \sum_{g=1}^{k} \sum_{x \in \text{cluster } g} ||x - \mu_g||^2 $$
+
+    - The between-cluster variation is given by:
+        $$ B = \sum_{g=1}^{k} (\text{\# points in cluster } g) ||\mu_g - \bar{\mu}||^2 $$
+
+    - The CH Index:
+        $$ CH(k) = \frac{B \cdot (n - k)}{W \cdot (k - 1)} $$
+        where $n$ is the total number of points.
+
+#### Note
+- Both score functions (RSS, CH Index) typically assume that clusters are spherical or circular in shape because they rely on the variance of points within a cluster and the mean distances between clusters.
+- Both methods may not perform well when dealing with clusters that have naturally elliptical shapes.
+
+
+
+#### Demo: CH Index
+
+```python
+from sklearn.metrics import calinski_harabasz_score
+
+best_score = -np.inf
+best_k = None
+best_model = None
+best_cluster_assignments = None
+
+for k in range(2, 11):
+    candidate_gmm = GaussianMixture(n_components=k, n_init=100, random_state=0)
+    candidate_gmm.fit(drug_data_normalized_tsne2d)
+    cluster_assignments = candidate_gmm.predict(drug_data_normalized_tsne2d)
+    score = calinski_harabasz_score(drug_data_normalized_tsne2d, cluster_assignments)
+    
+    print('k =', k, 'has CH index', score)
+    
+    if score > best_score:
+        best_score = score
+        best_k = k
+        best_model = candidate_gmm
+        best_cluster_assignments = cluster_assignments
+
+print('Best k within 2, 3, ..., 10 according to CH index:', best_k)
+
+# gmm_cluster_assignments = gmm.predict(drug_data_normalized_tsne2d)
+plt.scatter(drug_data_normalized_tsne2d[:, 0], drug_data_normalized_tsne2d[:, 1],
+            c=best_cluster_assignments, cmap='Set2')
+plt.axis('equal')
+```
+
+```
+k = 2 has CH index 1505.4006293920265
+k = 3 has CH index 2110.3029644602193
+k = 4 has CH index 2396.2770495307304
+k = 5 has CH index 2105.262843939271
+k = 6 has CH index 1918.0847027618404
+k = 7 has CH index 2050.317074780185
+k = 8 has CH index 1866.4328807466372
+k = 9 has CH index 2114.3474724625685
+k = 10 has CH index 2049.372098947085
+Best k within 2, 3, ..., 10 according to CH index: 4
+```
+
+
+
 
 
 [Back to Top](#)
@@ -875,7 +1090,238 @@ Repeat until convergence:
 
 
 
+
+
 ## Lecture 9. Topic Modeling
+
+
+### LDA (Latent Dirichlet Allocation) Generative Model
+- Learn the distribution of words for each topic
+    - In `.components_`
+- Backtrack the distribution of topics for each document
+    - Output of `.transform()` function
+
+
+LDA models each word in document $i$ to be generated as:
+1. Randomly choose a topic $Z$ using the topic distribution for doc $i$
+2. Randomly choose a word using the word distribution for topic $Z$
+
+
+
+### Demo: LDA
+
+
+`CountVectorizer` tokenize and remove terms that occur too frequently, not frequently enough, or stopwords
+```python
+vocab_size = 1000
+from sklearn.feature_extraction.text import CountVectorizer
+
+# document frequency (df) means number of documents a word appears in
+tf_vectorizer = CountVectorizer(max_df=0.95,
+                                min_df=2,
+                                stop_words='english',
+                                max_features=vocab_size)
+tf = tf_vectorizer.fit_transform(data)
+```
+
+`tf` have 10,000 rows (corresponding to documents) and 1000 columns (corresponding to words).
+
+
+
+The fitting procedure determines each topic's word distribution
+```python
+num_topics = 10
+
+from sklearn.decomposition import LatentDirichletAllocation
+lda = LatentDirichletAllocation(n_components=num_topics, random_state=0)
+lda.fit(tf)
+```
+
+
+```python
+# Distribution of the words for each of the topic
+lda.components_.shape
+```
+
+There are 10 topics and 1000 words in each topic
+```
+(10, 1000)
+```
+
+Without normalization, pseudocounts for how often different words appear per topic
+```python
+lda.components_.sum(axis=1)
+```
+
+```
+array([74979.92756, 37471.24963, 33866.78341, 40079.8962 , 41754.73437,
+       44022.38561, 36169.17215, 70224.62485, 41944.93058, 73054.29565])
+```
+
+Normalize to get the probability distributions
+```python
+topic_word_distributions = np.array([row / row.sum() for row in lda.components_])
+```
+
+```python
+topic_word_distributions.sum(axis=1)
+```
+
+For each topic, the word distribution sums up to 1
+```
+array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
+```
+
+
+
+Find the most probable words for each topic, and try to interpret what the different topics correspond to.
+```python
+num_top_words = 20
+
+def print_top_words(topic_word_distributions, num_top_words, vectorizer):
+    vocab = vectorizer.get_feature_names_out()
+    num_topics = len(topic_word_distributions)
+    print('Displaying the top %d words per topic and their probabilities within the topic...' % num_top_words)
+    print()
+
+    for topic_idx in range(num_topics):
+        print('[Topic ', topic_idx, ']', sep='')
+        sort_indices = np.argsort(-topic_word_distributions[topic_idx])
+        for rank in range(num_top_words):
+            word_idx = sort_indices[rank]
+            print(vocab[word_idx], ':',
+                  topic_word_distributions[topic_idx, word_idx])
+        print()
+
+print_top_words(topic_word_distributions, num_top_words, tf_vectorizer)
+```
+
+```
+[Topic 0]
+good : 0.01592254908129389
+like : 0.015847630671172192
+just : 0.015714974597809853
+think : 0.014658035148150056
+...
+```
+
+
+```python
+# Topic distribution for each document
+doc_topic_matrix = lda.transform(tf)
+```
+
+The matrix have 10000 rows (documents) and 10 columns (topics)
+```python
+doc_topic_matrix[0]
+```
+
+Topic 'religion' is the highest
+```
+array([0.00182, 0.00182, 0.02258, 0.00182, 0.00182, 0.00182, 0.00182,
+       0.96288, 0.00182, 0.00182])
+```
+
+
+Word clouds
+```python
+from wordcloud import WordCloud
+
+num_max_word_cloud_words = 100
+
+vocab = tf_vectorizer.get_feature_names_out()
+num_topics = len(topic_word_distributions)
+
+for topic_idx in range(num_topics):
+    wc = WordCloud(max_words=num_max_word_cloud_words)
+    wc.generate_from_frequencies(dict(zip(vocab, topic_word_distributions[topic_idx])))
+    plt.figure()
+    plt.imshow(wc, interpolation='bilinear')
+    plt.title('Topic %d' % topic_idx)
+```
+
+
+
+
+### TF-ID
+
+TF-IDF stands for Term Frequency-Inverse Document Frequency and is a statistical measure used to evaluate how important a word is to a document in a collection or corpus. The importance increases proportionally to the number of times a word appears in the document but is offset by the frequency of the word in the corpus.
+
+- The Term Frequency (TF) is calculated as:
+
+    $$
+    TF(t, d) = \frac{\text{Number of times term } t \text{ appears in a document } d}{\text{Total number of terms in the document } d}
+    $$
+
+- The Inverse Document Frequency (IDF) is calculated as:
+
+    $$
+    IDF(t, D) = \log\left(\frac{\text{Total number of documents } D}{\text{Number of documents with term } t \text{ in it}}\right)
+    $$
+
+- Therefore, the TF-IDF score for a term is calculated by:
+
+    $$
+    TFIDF(t, d, D) = TF(t, d) \times IDF(t, D)
+    $$
+
+    where:
+    - \( t \) is the term
+    - \( d \) is the document
+    - \( D \) is the corpus
+
+
+
+[Back to Top](#)
+
+---
+
+
+
+
+
+
+
+
+## Lecture 10.
+
+
+
+[Back to Top](#)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Lecture 11.
+
+
+
+[Back to Top](#)
+
+---
+
+
+
+
+
+
+
+
+
+## Lecture 12.
+
+
 
 [Back to Top](#)
 
